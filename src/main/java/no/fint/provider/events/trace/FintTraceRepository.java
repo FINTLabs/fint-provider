@@ -65,8 +65,8 @@ public class FintTraceRepository {
                 event.getTime(),
                 event.getCorrId());
         BlobClient blobClient = blobContainerClient.getBlobClient(name);
-        try (BlobOutputStream outputStream = blobClient.getBlockBlobClient().getBlobOutputStream()) {
-            objectMapper.writeValue(outputStream, event.getData());
+        try {
+            objectMapper.writeValue(blobClient.getBlockBlobClient().getBlobOutputStream(), event.getData());
         } catch (IOException e) {
             log.debug("Unable to write event {}", event.getCorrId(), e);
         }
