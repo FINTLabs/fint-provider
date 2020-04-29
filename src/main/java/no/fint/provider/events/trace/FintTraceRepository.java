@@ -4,7 +4,6 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
-import com.azure.storage.blob.specialized.BlobOutputStream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
@@ -72,15 +71,15 @@ public class FintTraceRepository {
         }
         blobClient.setMetadata(ImmutableMap.<String, String>builder()
                 .put("timestsamp", LocalDateTime.ofInstant(Instant.ofEpochMilli(event.getTime()), ZoneId.systemDefault()).toString())
-                .put("action", event.getAction())
-                .put("client", event.getClient())
-                .put("corrId", event.getCorrId())
-                .put("message", event.getMessage())
-                .put("operation", event.getOperation().name())
-                .put("orgId", event.getOrgId())
-                .put("responseStatus", event.getResponseStatus().name())
-                .put("source", event.getSource())
-                .put("status", event.getStatus().name())
+                .put("action", String.valueOf(event.getAction()))
+                .put("client", String.valueOf(event.getClient()))
+                .put("corrId", String.valueOf(event.getCorrId()))
+                .put("message", String.valueOf(event.getMessage()))
+                .put("operation", String.valueOf(event.getOperation()))
+                .put("orgId", String.valueOf(event.getOrgId()))
+                .put("responseStatus", String.valueOf(event.getResponseStatus()))
+                .put("source", String.valueOf(event.getSource()))
+                .put("status", String.valueOf(event.getStatus()))
                 .build());
         ++counter;
     }
