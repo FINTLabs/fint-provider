@@ -10,26 +10,26 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 @Slf4j
 @RequestMapping(value = "/admin/trace", produces = MediaType.APPLICATION_JSON_VALUE)
-public class TraceController {
+public class FintTraceController {
     @Autowired(required = false)
-    private TraceRepository traceRepository;
+    private FintTraceRepository fintTraceRepository;
 
     @PutMapping
     public void startTrace() {
-        if (traceRepository != null)
-            traceRepository.setTracing(true);
+        if (fintTraceRepository != null)
+            fintTraceRepository.setTracing(true);
     }
 
     @DeleteMapping
     public void stopTrace() {
-        if (traceRepository != null)
-            traceRepository.setTracing(false);
+        if (fintTraceRepository != null)
+            fintTraceRepository.setTracing(false);
     }
 
     @GetMapping
     public TraceStatus getStatus() {
-        if (traceRepository != null)
-            return new TraceStatus(traceRepository.isTracing(), traceRepository.getCounter());
+        if (fintTraceRepository != null)
+            return new TraceStatus(fintTraceRepository.isTracing(), fintTraceRepository.getCounter());
         return null;
     }
 

@@ -6,7 +6,7 @@ import no.fint.event.model.Event
 import no.fint.provider.events.ProviderProps
 import no.fint.provider.events.eventstate.EventStateService
 import no.fint.provider.events.sse.SseService
-import no.fint.provider.events.trace.TraceService
+import no.fint.provider.events.trace.FintTraceService
 import spock.lang.Specification
 
 class DownstreamSubscriberSpec extends Specification {
@@ -25,7 +25,7 @@ class DownstreamSubscriberSpec extends Specification {
                 sseService: sseService,
                 eventStateService: eventStateService,
                 fintAuditService: Mock(FintAuditService),
-                traceService: Mock(TraceService),
+                fintTraceService: Mock(FintTraceService),
                 providerProps: props
         )
     }

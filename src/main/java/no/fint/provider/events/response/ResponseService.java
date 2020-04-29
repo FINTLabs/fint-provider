@@ -8,7 +8,7 @@ import no.fint.events.FintEvents;
 import no.fint.provider.events.eventstate.EventState;
 import no.fint.provider.events.eventstate.EventStateService;
 import no.fint.provider.events.exceptions.UnknownEventException;
-import no.fint.provider.events.trace.TraceService;
+import no.fint.provider.events.trace.FintTraceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +29,7 @@ public class ResponseService {
     private FintEvents fintEvents;
 
     @Autowired
-    private TraceService traceService;
+    private FintTraceService fintTraceService;
 
     public void handleAdapterResponse(Event event) {
         log.debug("{}: Response for {} from {} status {} with {} elements.",
@@ -56,7 +56,7 @@ public class ResponseService {
             event.setStatus(Status.UPSTREAM_QUEUE);
             fintEvents.sendUpstream(event);
             fintAuditService.audit(event, Status.UPSTREAM_QUEUE);
-            traceService.trace(event);
+            fintTraceService.trace(event);
         } else {
             fintAuditService.audit(event, Status.ADAPTER_RESPONSE_ORPHANED);
             throw new UnknownEventException(event.getCorrId());

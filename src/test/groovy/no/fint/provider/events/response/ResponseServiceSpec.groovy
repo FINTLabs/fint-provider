@@ -7,7 +7,7 @@ import no.fint.events.FintEvents
 import no.fint.provider.events.eventstate.EventState
 import no.fint.provider.events.eventstate.EventStateService
 import no.fint.provider.events.exceptions.UnknownEventException
-import no.fint.provider.events.trace.TraceService
+import no.fint.provider.events.trace.FintTraceService
 import spock.lang.Specification
 
 class ResponseServiceSpec extends Specification {
@@ -22,7 +22,7 @@ class ResponseServiceSpec extends Specification {
                 fintEvents: fintEvents,
                 eventStateService: eventStateService,
                 fintAuditService: Mock(FintAuditService),
-                traceService: Mock(TraceService))
+                fintTraceService: Mock(FintTraceService))
     }
 
     def "Handle adapter response for health check event"() {

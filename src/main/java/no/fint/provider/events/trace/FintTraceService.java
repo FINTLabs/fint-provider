@@ -5,12 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TraceService {
+public class FintTraceService {
     @Autowired(required = false)
-    private TraceRepository traceRepository;
+    private FintTraceRepository fintTraceRepository;
 
     public void trace(Event event) {
-        if (traceRepository != null)
-            traceRepository.trace(event);
+        if (fintTraceRepository != null)
+            fintTraceRepository.trace(event);
     }
 }

@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 @Repository
 @Slf4j
 @ConditionalOnProperty("fint.provider.trace.enabled")
-public class TraceRepository {
+public class FintTraceRepository {
     private final BlobServiceClient blobServiceClient;
     private final BlobContainerClient blobContainerClient;
     private final ObjectMapper objectMapper;
@@ -38,7 +38,7 @@ public class TraceRepository {
     @Getter
     private volatile long counter;
 
-    public TraceRepository(
+    public FintTraceRepository(
             @Value("${fint.provider.trace.connection-string}") String connectionString,
             @Value("${fint.provider.trace.container-name}") String containerName,
             ObjectMapper objectMapper) {
