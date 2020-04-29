@@ -11,6 +11,7 @@ import no.fint.provider.events.Constants;
 import no.fint.provider.events.ProviderProps;
 import no.fint.provider.events.eventstate.EventStateService;
 import no.fint.provider.events.sse.SseService;
+import no.fint.provider.events.trace.TraceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,12 +31,16 @@ public class DownstreamSubscriber implements FintEventListener {
     @Autowired
     private ProviderProps providerProps;
 
+    @Autowired
+    private TraceService traceService;
+
     @Override
     public void accept(Event event) {
         log.debug("Event received: {}", event);
         if (event.isHealthCheck()) {
             event.addObject(new Health(Constants.COMPONENT, HealthStatus.RECEIVED_IN_PROVIDER_FROM_CONSUMER));
         } else {
+            traceService.trace(event);
             eventStateService.add(event, providerProps.getStatusTtl());
         }
 
