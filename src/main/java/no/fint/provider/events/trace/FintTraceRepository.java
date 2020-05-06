@@ -6,8 +6,6 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.event.model.Event;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,21 +27,17 @@ public class FintTraceRepository {
     private final BlobContainerClient blobContainerClient;
     private final ObjectMapper objectMapper;
     private final Executor executor;
-
-    @Getter
-    @Setter
-    private volatile boolean tracing;
-
-    @Getter
-    private volatile long counter;
+    private final Filter filter;
 
     public FintTraceRepository(
             @Value("${fint.provider.trace.connection-string}") String connectionString,
             @Value("${fint.provider.trace.container-name}") String containerName,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            Filter filter) {
         blobServiceClient = new BlobServiceClientBuilder().connectionString(connectionString).buildClient();
         blobContainerClient = blobServiceClient.getBlobContainerClient(containerName);
         this.objectMapper = objectMapper;
+        this.filter = filter;
         if (!blobContainerClient.exists()) {
             blobContainerClient.create();
         }
@@ -52,12 +46,16 @@ public class FintTraceRepository {
     }
 
     public void trace(Event event) {
-        if (tracing) {
+        if (filter.applies(event.getOrgId())) {
             executor.execute(() -> store(event));
         }
     }
 
+
     private void store(Event event) {
+        if (!filter.contains(event.getOrgId())) {
+            return;
+        }
         String name = String.format("%s/%s/%tF/%s.json",
                 event.getOrgId(),
                 event.getStatus(),
@@ -70,7 +68,7 @@ public class FintTraceRepository {
             log.debug("Unable to write event {}", event.getCorrId(), e);
         }
         blobClient.setMetadata(ImmutableMap.<String, String>builder()
-                .put("timestsamp", LocalDateTime.ofInstant(Instant.ofEpochMilli(event.getTime()), ZoneId.systemDefault()).toString())
+                .put("timestamp", LocalDateTime.ofInstant(Instant.ofEpochMilli(event.getTime()), ZoneId.systemDefault()).toString())
                 .put("action", String.valueOf(event.getAction()))
                 .put("client", String.valueOf(event.getClient()))
                 .put("corrId", String.valueOf(event.getCorrId()))
@@ -81,6 +79,7 @@ public class FintTraceRepository {
                 .put("source", String.valueOf(event.getSource()))
                 .put("status", String.valueOf(event.getStatus()))
                 .build());
-        ++counter;
     }
+
+
 }
