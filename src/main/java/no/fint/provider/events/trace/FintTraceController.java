@@ -16,14 +16,14 @@ public class FintTraceController {
     @Autowired
     private Filter filter;
 
-    @PutMapping("{orgId}")
+    @PutMapping("{orgId:.+}")
     public void startTrace(
             @PathVariable String orgId
     ) {
         filter.add(orgId);
     }
 
-    @DeleteMapping("{orgId}")
+    @DeleteMapping("{orgId:.+}")
     public void stopTrace(
             @PathVariable String orgId
     ) {
