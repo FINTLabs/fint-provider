@@ -56,10 +56,10 @@ public class FintTraceRepository {
         if (!filter.contains(event.getOrgId())) {
             return;
         }
-        String name = String.format("%s/%s/%tF/%s.json",
+        String name = String.format("%s/%tF/%s/%s.json",
                 event.getOrgId(),
-                event.getStatus(),
                 event.getTime(),
+                event.getStatus(),
                 event.getCorrId());
         BlobClient blobClient = blobContainerClient.getBlobClient(name);
         try {
