@@ -49,7 +49,11 @@ public class EventStateService {
 
     public List<Event> getExpiredEvents() {
         List<EventState> expired = eventStates.values().stream().filter(EventState::expired).collect(Collectors.toList());
-        long count = expired.stream().map(EventState::getCorrId).peek(eventStates::remove).count();
+        long count = expired.stream()
+                .peek(eventState -> log.info("Removing event: {}", eventState.getEvent().toString()))
+                .map(EventState::getCorrId)
+                .peek(eventStates::remove)
+                .count();
         if (count > 0) {
             log.info("Removed {} expired events", count);
         }
