@@ -5,7 +5,6 @@ import no.fint.event.model.Event
 import no.fint.event.model.Status
 import no.fint.events.FintEvents
 import no.fint.provider.events.ProviderProps
-import no.fint.provider.events.eventstate.EventState
 import no.fint.provider.events.eventstate.EventStateService
 import no.fint.provider.events.exceptions.UnknownEventException
 import spock.lang.Specification
@@ -38,8 +37,7 @@ class StatusServiceSpec extends Specification {
         statusService.updateEventState(event)
 
         then:
-        1 * eventStateService.remove(event) >> Optional.of(new EventState(event, 15))
-        1 * eventStateService.add(event, props.responseTtl)
+        1 * eventStateService.update(event, props.responseTtl) >> true
         1 * fintAuditService.audit(event)
     }
 
@@ -51,10 +49,9 @@ class StatusServiceSpec extends Specification {
         statusService.updateEventState(event)
 
         then:
-        1 * eventStateService.remove(event) >> Optional.of(new EventState(event, 10))
+        1 * eventStateService.update(event, 0) >> true
         1 * fintEvents.sendUpstream(event)
         1 * fintAuditService.audit(event)
-        0 * eventStateService.add(_)
     }
 
     def "Handle non-existing event state"() {
@@ -62,7 +59,7 @@ class StatusServiceSpec extends Specification {
         statusService.updateEventState(new Event())
 
         then:
-        1 * eventStateService.remove(_ as Event) >> Optional.empty()
+        1 * eventStateService.update(_ as Event, _) >> false
         thrown(UnknownEventException)
     }
 }

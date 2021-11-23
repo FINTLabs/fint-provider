@@ -11,7 +11,6 @@ import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.stream.Collectors;
 
@@ -41,13 +40,20 @@ public class EventStateService {
         eventStates.put(event.getCorrId(), new EventState(event, timeToLiveInMinutes));
     }
 
-    public Optional<EventState> remove(Event event) {
-        return Optional.ofNullable(eventStates.remove(event.getCorrId()));
+    public boolean update(Event event, int timeToLiveInMinutes) {
+        if (timeToLiveInMinutes <= 0) {
+            return eventStates.remove(event.getCorrId()) != null;
+        }
+        return eventStates.replace(event.getCorrId(), new EventState(event, timeToLiveInMinutes)) != null;
     }
 
     public List<Event> getExpiredEvents() {
         List<EventState> expired = eventStates.values().stream().filter(EventState::expired).collect(Collectors.toList());
-        long count = expired.stream().map(EventState::getCorrId).peek(eventStates::remove).count();
+        long count = expired.stream()
+                .peek(eventState -> log.info("Removing event: {}", eventState.getEvent().toString()))
+                .map(EventState::getCorrId)
+                .peek(eventStates::remove)
+                .count();
         if (count > 0) {
             log.info("Removed {} expired events", count);
         }

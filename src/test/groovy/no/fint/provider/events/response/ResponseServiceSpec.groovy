@@ -4,9 +4,9 @@ import no.fint.audit.FintAuditService
 import no.fint.event.model.DefaultActions
 import no.fint.event.model.Event
 import no.fint.events.FintEvents
-import no.fint.provider.events.eventstate.EventState
 import no.fint.provider.events.eventstate.EventStateService
 import no.fint.provider.events.exceptions.UnknownEventException
+import no.fint.provider.events.trace.FintTraceService
 import spock.lang.Specification
 
 class ResponseServiceSpec extends Specification {
@@ -17,7 +17,11 @@ class ResponseServiceSpec extends Specification {
     void setup() {
         fintEvents = Mock(FintEvents)
         eventStateService = Mock(EventStateService)
-        responseService = new ResponseService(fintEvents: fintEvents, eventStateService: eventStateService, fintAuditService: Mock(FintAuditService))
+        responseService = new ResponseService(
+                fintEvents: fintEvents,
+                eventStateService: eventStateService,
+                fintAuditService: Mock(FintAuditService),
+                fintTraceService: Mock(FintTraceService))
     }
 
     def "Handle adapter response for health check event"() {
@@ -39,7 +43,7 @@ class ResponseServiceSpec extends Specification {
         responseService.handleAdapterResponse(event)
 
         then:
-        1 * eventStateService.remove(event) >> Optional.of(new EventState(event, 10))
+        1 * eventStateService.update(event, 0) >> true
         1 * fintEvents.sendUpstream(event)
     }
 
@@ -51,7 +55,7 @@ class ResponseServiceSpec extends Specification {
         responseService.handleAdapterResponse(event)
 
         then:
-        1 * eventStateService.remove(event) >> Optional.empty()
+        1 * eventStateService.update(event, 0) >> false
         thrown(UnknownEventException)
     }
 }

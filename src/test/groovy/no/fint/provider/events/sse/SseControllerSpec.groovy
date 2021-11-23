@@ -30,6 +30,7 @@ class SseControllerSpec extends MockMvcSpecification {
     def "Subscribe to sse client"() {
         when:
         def response = mockMvc.perform(get('/sse/123')
+                .header('x-allowed-asset-ids', 'rogfk.no,bar.rogfk.no')
                 .header(HeaderConstants.ORG_ID, 'rogfk.no')
                 .header(HeaderConstants.CLIENT, 'client'))
 
@@ -43,11 +44,27 @@ class SseControllerSpec extends MockMvcSpecification {
     def "Subscribe to sse client with invalid org should fail"() {
         when:
         def response = mockMvc.perform(get('/sse/123')
+                .header('x-allowed-asset-ids', 'rogfk.no,bar.rogfk.no')
                 .header(HeaderConstants.ORG_ID, 'rogfk.no')
                 .header(HeaderConstants.CLIENT, 'client'))
 
         then:
         1 * adminService.register('rogfk.no', 'client') >> false
+        0 * sseService.subscribe('123', 'rogfk.no', 'client')
+        0 * fintEvents.registerDownstreamListener('rogfk.no', downstreamSubscriber)
+        response.andExpect(status().is4xxClientError())
+
+    }
+
+    def "Subscribe to sse client with incorrect org should fail"() {
+        when:
+        def response = mockMvc.perform(get('/sse/123')
+                .header('x-allowed-asset-ids', 'test.org')
+                .header(HeaderConstants.ORG_ID, 'rogfk.no')
+                .header(HeaderConstants.CLIENT, 'client'))
+
+        then:
+        0 * adminService.register('rogfk.no', 'client')
         0 * sseService.subscribe('123', 'rogfk.no', 'client')
         0 * fintEvents.registerDownstreamListener('rogfk.no', downstreamSubscriber)
         response.andExpect(status().is4xxClientError())

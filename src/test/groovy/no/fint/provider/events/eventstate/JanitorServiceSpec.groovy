@@ -25,7 +25,6 @@ class JanitorServiceSpec extends Specification {
 
         then:
         1 * eventStateService.getExpiredEvents() >> [new Event(orgId: 'otherfk.no')]
-        0 * eventStateService.remove(_ as Event)
         1 * fintAuditService.audit(_ as Event)
         1 * fintEvents.sendUpstream(_ as Event)
     }
