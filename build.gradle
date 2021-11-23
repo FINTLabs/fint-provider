@@ -72,7 +72,12 @@ dependencies {
 
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.apache.tomcat.embed:tomcat-embed-core:8.5.45')
-    runtime('org.springframework.boot:spring-boot-starter-actuator')
+    //runtime('org.springframework.boot:spring-boot-starter-actuator')
+
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+
+    compile('io.micrometer:micrometer-registry-prometheus:latest.release')
+    compile('io.micrometer:micrometer-spring-legacy:latest.release')
 
     testCompile('no.fint:fint-test-utils:0.0.6')
     testCompile("cglib:cglib-nodep:${cglibVersion}")
