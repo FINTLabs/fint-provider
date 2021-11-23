@@ -7,13 +7,10 @@ import no.fint.event.model.ResponseStatus;
 import no.fint.event.model.Status;
 import no.fint.events.FintEvents;
 import no.fint.provider.events.ProviderProps;
-import no.fint.provider.events.eventstate.EventState;
 import no.fint.provider.events.eventstate.EventStateService;
 import no.fint.provider.events.exceptions.UnknownEventException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -33,13 +30,9 @@ public class StatusService {
 
     public void updateEventState(Event event) {
         log.trace("Event received: {}", event);
-        Optional<EventState> state = eventStateService.remove(event);
-        if (state.isPresent()) {
+        if (eventStateService.update(event, getTtl(event.getStatus()))) {
             fintAuditService.audit(event);
-
-            if (event.getStatus() == Status.ADAPTER_ACCEPTED) {
-                eventStateService.add(event, providerProps.getResponseTtl());
-            } else {
+            if (event.getStatus() != Status.ADAPTER_ACCEPTED) {
                 sendResponse(event);
             }
         } else {
@@ -47,12 +40,18 @@ public class StatusService {
         }
     }
 
+    private int getTtl(Status status) {
+        if (status == Status.ADAPTER_ACCEPTED) {
+            return providerProps.getResponseTtl();
+        }
+        return 0;
+    }
+
     private void sendResponse(Event event) {
         if (event.getResponseStatus() == null) {
             event.setResponseStatus(ResponseStatus.REJECTED);
         }
-        log.debug("{} adapter did not acknowledge the event (status: {}), sending event upstream.", event.getOrgId(), event.getStatus().name());
-        event.setMessage(String.format("Adapter did not acknowledge the event (status: %s)", event.getStatus().name()));
+        log.debug("{} adapter did not acknowledge the event (status: {}), sending event upstream.", event.getOrgId(), event.getStatus());
         fintEvents.sendUpstream(event);
     }
 

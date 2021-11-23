@@ -31,6 +31,7 @@ class StatusControllerSpec extends MockMvcSpecification {
         def response = mockMvc.perform(
                 post('/status')
                         .header(HeaderConstants.ORG_ID, 'rogfk.no')
+                        .header(HeaderConstants.CLIENT, 'spock')
                         .content(eventJson)
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
 
@@ -44,6 +45,7 @@ class StatusControllerSpec extends MockMvcSpecification {
         def response = mockMvc.perform(
                 post('/status')
                         .header(HeaderConstants.ORG_ID, 'rogfk.no')
+                        .header(HeaderConstants.CLIENT, 'spock')
                         .content(eventJson)
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
 
@@ -57,6 +59,7 @@ class StatusControllerSpec extends MockMvcSpecification {
         def response = mockMvc.perform(
                 post('/status')
                         .header(HeaderConstants.ORG_ID, 'rogfk.no')
+                        .header(HeaderConstants.CLIENT, 'spock')
                         .content(eventJson)
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
 

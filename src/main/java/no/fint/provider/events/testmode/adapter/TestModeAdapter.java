@@ -1,7 +1,6 @@
 package no.fint.provider.events.testmode.adapter;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.event.model.Event;
 import no.fint.event.model.HeaderConstants;
@@ -83,7 +82,8 @@ public class TestModeAdapter extends AbstractEventListener {
 
     private void postStatus(Event event) {
         HttpHeaders headers = new HttpHeaders();
-        headers.put(HeaderConstants.ORG_ID, Lists.newArrayList(event.getOrgId()));
+        headers.set(HeaderConstants.ORG_ID, event.getOrgId());
+        headers.set(HeaderConstants.CLIENT, TestModeConstants.CLIENT);
         ResponseEntity<Void> response = restTemplate.exchange("http://localhost:{port}/{context}/status",
                 HttpMethod.POST, new HttpEntity<>(event, headers), Void.class, port, contextPath);
         log.info("Provider POST response: {}", response.getStatusCode());
@@ -91,7 +91,8 @@ public class TestModeAdapter extends AbstractEventListener {
 
     private void postResponse(Event event) {
         HttpHeaders headers = new HttpHeaders();
-        headers.put(HeaderConstants.ORG_ID, Lists.newArrayList(event.getOrgId()));
+        headers.set(HeaderConstants.ORG_ID, event.getOrgId());
+        headers.set(HeaderConstants.CLIENT, TestModeConstants.CLIENT);
         ResponseEntity<Void> response = restTemplate.exchange("http://localhost:{port}/{context}/response",
                 HttpMethod.POST, new HttpEntity<>(event, headers), Void.class, port, contextPath);
         log.info("Provider POST response: {}", response.getStatusCode());

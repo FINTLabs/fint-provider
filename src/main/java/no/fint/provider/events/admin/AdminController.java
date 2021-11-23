@@ -4,15 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
-import no.fint.audit.plugin.mongo.MongoAuditEvent;
 import no.fint.event.model.HeaderConstants;
 import no.fint.events.FintEvents;
 import no.fint.provider.events.Constants;
 import no.fint.provider.events.subscriber.DownstreamSubscriber;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.time.Duration;
-import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -40,23 +34,7 @@ public class AdminController {
     private AdminService adminService;
 
     @Autowired
-    private MongoOperations mongo;
-
-    @Autowired
     private DownstreamSubscriber downstreamSubscriber;
-
-    @GetMapping("/audit/events")
-    public List<MongoAuditEvent> getAllEvents() {
-        return mongo.findAll(MongoAuditEvent.class);
-    }
-
-    @GetMapping("/audit/events/since/{when}")
-    public List<MongoAuditEvent> queryEventsSince(@PathVariable String when) {
-        Duration duration = Duration.parse(when);
-        Criteria c = Criteria.where("timestamp").gt(ZonedDateTime.now().minus(duration).toInstant().toEpochMilli());
-        Query q = new Query(c);
-        return mongo.find(q, MongoAuditEvent.class);
-    }
 
     @GetMapping("/orgIds")
     public List<Map> getOrganizations() {

@@ -30,6 +30,7 @@ class ResponseControllerSpec extends Specification {
         when:
         def response = mockMvc.perform(post('/response')
                 .header(HeaderConstants.ORG_ID, 'rogfk.no')
+                .header(HeaderConstants.CLIENT, 'spock')
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody))
 
@@ -45,6 +46,7 @@ class ResponseControllerSpec extends Specification {
         when:
         def response = mockMvc.perform(post('/response')
                 .header(HeaderConstants.ORG_ID, 'rogfk.no')
+                .header(HeaderConstants.CLIENT, 'spock')
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonBody))
 

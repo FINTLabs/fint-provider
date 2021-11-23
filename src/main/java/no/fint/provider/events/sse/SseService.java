@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.PreDestroy;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -35,7 +34,7 @@ public class SseService {
     public synchronized FintSseEmitter subscribe(String id, String orgId, String client) {
         final FintSseEmitters fintSseEmitters = Optional
                 .ofNullable(clients.get(orgId))
-                .orElseGet(() -> FintSseEmitters.with(providerProps.getMaxNumberOfEmitters(), SseEmitter::complete));
+                .orElseGet(() -> FintSseEmitters.with(providerProps.getMaxNumberOfEmitters(), FintSseEmitter::complete));
 
         return fintSseEmitters.get(id).orElseGet(() -> {
             log.info("{}: {} connected", orgId, id);
@@ -81,9 +80,10 @@ public class SseService {
             try {
                 SseEmitter.SseEventBuilder builder = SseEmitter.event().comment("Heartbeat").reconnectTime(5000L);
                 emitter.send(builder);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 log.info("Error sending heartbeat to SseEmitter {} {}: {}", emitter.getClient(), emitter.getId(), e.getMessage());
                 log.debug("Details:", e);
+                emitters.remove(emitter);
             }
         }));
     }

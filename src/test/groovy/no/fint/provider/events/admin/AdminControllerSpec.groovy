@@ -1,13 +1,10 @@
 package no.fint.provider.events.admin
 
-import no.fint.audit.plugin.mongo.MongoAuditEvent
-import no.fint.event.model.Event
+
 import no.fint.event.model.HeaderConstants
 import no.fint.events.FintEvents
 import no.fint.provider.events.subscriber.DownstreamSubscriber
 import no.fint.test.utils.MockMvcSpecification
-import org.springframework.data.mongodb.core.MongoOperations
-import org.springframework.data.mongodb.core.query.Query
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -15,7 +12,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 class AdminControllerSpec extends MockMvcSpecification {
     private DownstreamSubscriber downstreamSubscriber
     private AdminController controller
-    private MongoOperations mongoOperations
     private FintEvents fintEvents
     private AdminService adminService
     private MockMvc mockMvc
@@ -23,30 +19,9 @@ class AdminControllerSpec extends MockMvcSpecification {
     void setup() {
         downstreamSubscriber = Mock(DownstreamSubscriber)
         adminService = Mock(AdminService)
-        mongoOperations = Mock(MongoOperations)
         fintEvents = Mock(FintEvents)
-        controller = new AdminController(mongo: mongoOperations, fintEvents: fintEvents, adminService: adminService, downstreamSubscriber: downstreamSubscriber)
+        controller = new AdminController(fintEvents: fintEvents, adminService: adminService, downstreamSubscriber: downstreamSubscriber)
         mockMvc = standaloneSetup(controller)
-    }
-
-    def "GET all audit events"() {
-        when:
-        def response = mockMvc.perform(get('/admin/audit/events'))
-
-        then:
-        1 * mongoOperations.findAll(MongoAuditEvent) >> [new MongoAuditEvent(new Event(orgId: 'rogfk.no'), true)]
-        response.andExpect(status().isOk())
-                .andExpect(jsonPath('$[0].orgId').value(equalTo('rogfk.no')))
-    }
-
-    def "GET audit events since some timestamp"() {
-        when:
-        def response = mockMvc.perform(get('/admin/audit/events/since/PT1H'))
-
-        then:
-        1 * mongoOperations.find(_ as Query, MongoAuditEvent) >> [new MongoAuditEvent(new Event(orgId: 'rogfk.no'), true)]
-        response.andExpect(status().isOk())
-                .andExpect(jsonPath('$[0].orgId').value(equalTo('rogfk.no')))
     }
 
     def "POST new orgId"() {

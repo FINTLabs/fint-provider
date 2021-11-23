@@ -1,7 +1,6 @@
 package no.fint.provider.events.eventstate
 
 import com.hazelcast.core.HazelcastInstance
-import com.hazelcast.core.IMap
 import no.fint.event.model.Event
 import no.fint.provider.events.ProviderProps
 import spock.lang.Specification
@@ -37,7 +36,7 @@ class EventStateServiceSpec extends Specification {
         eventStateService.getEventStates().size() == 1
     }
 
-    def "Remove existing EventState"() {
+    def "Updating existing EventState with TTL should succeed and retain event"() {
         given:
         def event = new Event('rogfk.no', 'test', 'GET_ALL', 'test')
         eventStateService.add(event, 2)
@@ -46,14 +45,30 @@ class EventStateServiceSpec extends Specification {
         eventStateService.getEventStates().size() == 1
 
         when:
-        def eventState = eventStateService.remove(event)
+        def result = eventStateService.update(event, 10)
 
         then:
-        eventState.isPresent()
+        result
+        !eventStateService.getEventStates().isEmpty()
+    }
+
+    def "Updating existing EventState with zero TTL should succeed and remove event"() {
+        given:
+        def event = new Event('rogfk.no', 'test', 'GET_ALL', 'test')
+        eventStateService.add(event, 2)
+
+        expect:
+        eventStateService.getEventStates().size() == 1
+
+        when:
+        def result = eventStateService.update(event, 0)
+
+        then:
+        result
         eventStateService.getEventStates().isEmpty()
     }
 
-    def "Trying to remove EventState that does not exist"() {
+    def "Updating event that does not exist should fail"() {
         given:
         def event = new Event()
 
@@ -61,10 +76,10 @@ class EventStateServiceSpec extends Specification {
         eventStateService.getEventStates().isEmpty()
 
         when:
-        def eventState = eventStateService.remove(event)
+        def result = eventStateService.update(event, 10)
 
         then:
-        !eventState.isPresent()
+        !result
     }
 
     def "Get expired EventStates"() {
