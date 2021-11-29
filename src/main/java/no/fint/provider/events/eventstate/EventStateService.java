@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,7 +28,8 @@ public class EventStateService {
         if (providerProps.isUseHazelcastForEventState()) {
             eventStates = hazelcastInstance.getMap(providerProps.getKey());
         } else {
-            eventStates = new ConcurrentSkipListMap<>();
+            //eventStates = new ConcurrentSkipListMap<>();
+            eventStates = Collections.synchronizedMap(new HashMap<>());//new ConcurrentSkipListMap<>();
         }
         log.info("Event States: {}", eventStates.getClass());
     }
