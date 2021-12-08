@@ -7,7 +7,10 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
@@ -16,6 +19,7 @@ public class FintSseEmitter extends SseEmitter {
     private String id;
     private String client;
     private String registered;
+    private Set<String> actions = new HashSet<>();
     private final AtomicInteger eventCounter = new AtomicInteger();
     private static final DatePrinter DATE_PRINTER = FastDateFormat.getInstance("HH:mm:ss dd/MM/yyyy");
 

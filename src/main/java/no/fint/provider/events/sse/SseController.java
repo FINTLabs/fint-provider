@@ -10,6 +10,7 @@ import no.fint.provider.events.Constants;
 import no.fint.provider.events.ProviderProps;
 import no.fint.provider.events.admin.AdminService;
 import no.fint.provider.events.subscriber.DownstreamSubscriber;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,14 +50,18 @@ public class SseController {
             @RequestHeader("x-allowed-asset-ids") String[] allowedAssetIds,
             @ApiParam(Constants.SWAGGER_X_ORG_ID) @RequestHeader(HeaderConstants.ORG_ID) String orgId,
             @ApiParam("ID of client.") @RequestHeader(HeaderConstants.CLIENT) String client,
+            @RequestHeader(value = "x-fint-actions", required = false, defaultValue = "") String actions,
             @ApiParam("Global unique id for the client. Typically a UUID.") @PathVariable String id) {
+        log.info("{}: Client {}, ID {}, actions {}", orgId, client, id, actions);
         log.info("{} should be within {}", orgId, allowedAssetIds);
-        log.info("{}: Client {}, ID {}", orgId, client, id);
         if (!Arrays.asList(allowedAssetIds).contains(orgId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).header("x-Error", "Invalid orgID " + orgId).build();
         }
         if (adminService.register(orgId, client)) {
-            SseEmitter emitter = sseService.subscribe(id, orgId, client);
+            FintSseEmitter emitter = sseService.subscribe(id, orgId, client);
+            if (StringUtils.isNotBlank(actions)) {
+                emitter.getActions().addAll(Arrays.asList(StringUtils.split(actions, ",;:")));
+            }
             fintEvents.registerDownstreamListener(orgId, downstreamSubscriber);
             return ResponseEntity.ok(emitter);
         } else {
@@ -71,7 +76,7 @@ public class SseController {
         List<SseOrg> orgs = new ArrayList<>();
         clients.forEach((key, value) -> {
             List<SseClient> sseClients = new ArrayList<>();
-            value.forEach(emitter -> sseClients.add(new SseClient(emitter.getRegistered(), emitter.getId(), emitter.getClient(), emitter.getEventCounter().get())));
+            value.forEach(emitter -> sseClients.add(new SseClient(emitter.getRegistered(), emitter.getId(), emitter.getClient(), emitter.getEventCounter().get(), emitter.getActions())));
 
             orgs.add(new SseOrg(props.getContextPath(), key, sseClients));
         });

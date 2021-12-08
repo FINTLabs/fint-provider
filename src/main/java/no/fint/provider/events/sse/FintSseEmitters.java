@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class FintSseEmitters implements Iterable<FintSseEmitter> {
     private final int maxSize;
@@ -40,6 +41,10 @@ public class FintSseEmitters implements Iterable<FintSseEmitter> {
 
     public int size() {
         return emitters.size();
+    }
+
+    public Stream<FintSseEmitter> stream() {
+        return emitters.stream();
     }
 
     @Override

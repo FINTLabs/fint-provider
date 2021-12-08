@@ -62,14 +62,16 @@ class SseServiceSpec extends Specification {
 
     def "Handle exception when trying to send message"() {
         given:
-        def emitter = Mock(FintSseEmitter)
+        def emitter = Mock(FintSseEmitter) {
+            _ * getActions() >> Collections.singleton('GET_MONKEY')
+        }
         def emitters = FintSseEmitters.with(5)
         emitters.add(emitter)
         def clients = ['hfk.no': emitters] as ConcurrentHashMap
         sseService = new SseService(providerProps: props, clients: clients)
 
         when:
-        sseService.send(new Event(orgId: 'hfk.no'))
+        sseService.send(new Event(orgId: 'hfk.no', action: 'GET_MONKEY'))
 
         then:
         1 * emitter.send(_ as SseEmitter.SseEventBuilder) >> { throw new IOException('Test exception') }

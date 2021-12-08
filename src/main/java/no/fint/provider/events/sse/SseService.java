@@ -9,12 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.PreDestroy;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 @Slf4j
 @Service
@@ -29,7 +32,7 @@ public class SseService {
         clients.values().forEach(emitters -> emitters.forEach(FintSseEmitter::complete));
     }
 
-    public synchronized SseEmitter subscribe(String id, String orgId, String client) {
+    public synchronized FintSseEmitter subscribe(String id, String orgId, String client) {
         final FintSseEmitters fintSseEmitters = Optional
                 .ofNullable(clients.get(orgId))
                 .orElseGet(() -> FintSseEmitters.with(providerProps.getMaxNumberOfEmitters(), FintSseEmitter::complete));
@@ -53,19 +56,24 @@ public class SseService {
         FintSseEmitters emitters = clients.get(event.getOrgId());
         if (emitters == null) {
             log.info("No sse clients registered for {}", event.getOrgId());
+        } else if (emitters.stream().map(FintSseEmitter::getActions).flatMap(Set::stream).anyMatch(event.getAction()::equals)) {
+            log.debug("Only sending event to emitters supporting {}", event.getAction());
+            emitters.stream().filter(i -> i.getActions().contains(event.getAction())).forEach(consumeEvent(event));
         } else {
-            emitters.forEach(emitter -> {
-                try {
-                    SseEmitter.SseEventBuilder builder = SseEmitter.event().id(event.getCorrId()).name(event.getAction()).data(event).reconnectTime(5000L);
-                    emitter.send(builder);
-                } catch (Exception e) {
-                    log.info("Error sending message to SseEmitter {} {}: {}", emitter.getClient(), emitter.getId(), e.getMessage());
-                    log.debug("Details: {}", event, e);
-                    emitters.remove(emitter);
-                }
-            });
-
+            emitters.stream().forEach(consumeEvent(event));
         }
+    }
+
+    private Consumer<FintSseEmitter> consumeEvent(Event event) {
+        return (fintSseEmitter -> {
+            try {
+                SseEmitter.SseEventBuilder builder = SseEmitter.event().id(event.getCorrId()).name(event.getAction()).data(event).reconnectTime(5000L);
+                fintSseEmitter.send(builder);
+            } catch (IOException e) {
+                log.info("Error sending message to SseEmitter {} {}: {}", fintSseEmitter.getClient(), fintSseEmitter.getId(), e.getMessage());
+                log.debug("Details: {}", event, e);
+            }
+        });
     }
 
     public void sendHeartbeat() {
