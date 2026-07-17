@@ -17,8 +17,6 @@ fint:
   events:
     test-mode: true
     queue-endpoint-enabled: true
-  springfox:
-    swagger-https: false
 
 server:
   port: 8081

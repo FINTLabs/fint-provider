@@ -1,8 +1,6 @@
 package no.fint.provider.events.eventstate;
 
-import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import no.fint.provider.events.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +11,6 @@ import java.util.Collection;
 
 @Slf4j
 @RestController
-@Api(tags = {"eventstates"}, description = Constants.SWAGGER_DESC_INTERNAL_API)
-
 @RequestMapping(value = "/eventStates", produces = MediaType.APPLICATION_JSON_VALUE)
 public class EventStateController {
 

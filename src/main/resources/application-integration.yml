@@ -14,8 +14,6 @@ fint:
       endpoint: http://localhost:8080/endpoints
   audit:
     test-mode: true
-  springfox:
-    swagger-https: false
 
 server:
   port: 8080
