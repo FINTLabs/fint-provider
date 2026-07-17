@@ -1,9 +1,4 @@
-springfox:
-  title: 'test'
-  version: '1.0.0'
-
 fint:
-  version: '${springfox.version}'
   audit:
     test-mode: true
   events:

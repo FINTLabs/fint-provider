@@ -1,12 +1,9 @@
 package no.fint.provider.events.admin;
 
 import com.google.common.collect.ImmutableMap;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import no.fint.event.model.HeaderConstants;
 import no.fint.events.FintEvents;
-import no.fint.provider.events.Constants;
 import no.fint.provider.events.subscriber.DownstreamSubscriber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +20,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@Api(tags = {"Admin"}, description = Constants.SWAGGER_DESC_INTERNAL_API)
 @RequestMapping(value = "/admin", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AdminController {
 
@@ -45,7 +41,7 @@ public class AdminController {
     }
 
     @GetMapping("/orgIds/{orgId:.+}")
-    public ResponseEntity getOrganization(@ApiParam(Constants.SWAGGER_X_ORG_ID) @PathVariable String orgId) {
+    public ResponseEntity getOrganization(@PathVariable String orgId) {
         if (adminService.isRegistered(orgId)) {
             return ResponseEntity.ok(ImmutableMap.of(
                     "orgId", orgId,
@@ -58,8 +54,8 @@ public class AdminController {
 
     @PostMapping("/orgIds/{orgId:.+}")
     public ResponseEntity registerOrgId(
-            @ApiParam(Constants.SWAGGER_X_ORG_ID) @PathVariable String orgId,
-            @ApiParam("ID of client.") @RequestHeader(HeaderConstants.CLIENT) String client) {
+            @PathVariable String orgId,
+            @RequestHeader(HeaderConstants.CLIENT) String client) {
         if (adminService.isRegistered(orgId)) {
             return ResponseEntity.noContent().build();
         } else if (adminService.register(orgId, client)) {

@@ -6,4 +6,11 @@ spring:
     logResolvedException: false
 
 fint:
+  hazelcast:
+    config: fint-provider-hazelcast.xml
   version: '@version@'
+  audit:
+    azure:
+      eventhub:
+        connection-string: Endpoint=sb://evh-fint-audit-beta.danieljohnsen.no.no/;SharedAccessKeyName=evh-fint-audit-beta-send;SharedAccessKey=dummy=;EntityPath=evh-fint-audit-beta
+        name: "evh-fint-audit-beta"
