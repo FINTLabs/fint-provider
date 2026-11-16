@@ -4,9 +4,9 @@ COPY . .
 ARG buildFlags=""
 RUN ./gradlew --no-daemon ${buildFlags} build
 
-FROM gcr.io/distroless/java:8
+FROM eclipse-temurin:8-jre
 ENV JAVA_TOOL_OPTIONS=-XX:+ExitOnOutOfMemoryError
 COPY --from=builder /workspace/build/deps/external/*.jar /data/
 COPY --from=builder /workspace/build/deps/fint/*.jar /data/
 COPY --from=builder /workspace/build/libs/fint-provider-*.jar /data/fint-provider.jar
-CMD ["/data/fint-provider.jar"]
+ENTRYPOINT ["java", "-jar", "/data/fint-provider.jar"]
