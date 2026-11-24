@@ -65,7 +65,7 @@ dependencies {
     compile("org.projectlombok:lombok:${lombokVersion}")
     compile('com.github.fakemongo:fongo:2.1.1')
     compile('com.jayway.jsonpath:json-path:2.4.0')
-    compile('org.reflections:reflections:0.9.11')
+    compile('org.reflections:reflections:0.10.2')
     compile('org.apache.commons:commons-lang3:3.9')
     compile('org.jooq:jool-java-8:0.9.14')
 
